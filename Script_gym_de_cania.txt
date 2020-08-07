@@ -1,4 +1,4 @@
-CREATE TABLE sucursales(
+cREATE TABLE sucursales(
     codigo_id SERIAL PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
     direccion VARCHAR(150) NOT NULL
