@@ -1,0 +1,423 @@
+CREATE TABLE sucursales(
+    codigo_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL,
+    direccion VARCHAR(150) NOT NULL
+);
+
+CREATE TABLE personas(
+    codigo_id VARCHAR(30) PRIMARY KEY,
+    nombre  VARCHAR(30) NOT NULL,
+    apellidos VARCHAR(50) NOT NULL,
+    f_nacimiento DATE NOT NULL,
+    n_usuario VARCHAR(30) NOT NULL,
+    contra TEXT NOT NULL,
+	ci VARCHAR(30) 
+);
+ALTER TABLE personas
+ADD CONSTRAINT Cons_unic_user UNIQUE (n_usuario);
+
+CREATE TABLE clientes(
+    codigo_id VARCHAR(30) PRIMARY KEY,
+    f_entrada DATE NOT NULL,
+    sucursal_id INT NOT NULL,
+    permitido BOOLEAN NOT NULL
+);
+
+ALTER TABLE clientes ADD FOREIGN KEY (codigo_id) REFERENCES personas(codigo_id);
+ALTER TABLE clientes ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+
+CREATE TABLE empleados(
+    codigo_id VARCHAR(30) PRIMARY KEY,
+    salario NUMERIC(9,2) NOT NULL,
+    desc_labor TEXT,
+    sucursal_id INT NOT NULL
+);
+
+ALTER TABLE empleados ADD FOREIGN KEY (codigo_id) REFERENCES personas(codigo_id);
+ALTER TABLE empleados ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+
+CREATE TABLE entrada_salida_trabajo(
+    empleado_id VARCHAR(30) NOT NULL,
+    hora_entrada TIMESTAMP NOT NULL,
+    hora_salida TIMESTAMP
+);
+
+ALTER TABLE entrada_salida_trabajo ADD PRIMARY KEY (empleado_id,hora_entrada);
+ALTER TABLE entrada_salida_trabajo ADD FOREIGN KEY (empleado_id) REFERENCES empleados(codigo_id);
+
+CREATE TABLE productos(
+    codigo_id SERIAL PRIMARY KEY,
+    precio NUMERIC(7,2) NOT NULL,
+    nombre VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE productos_sucursales(
+    sucursal_id INT NOT NULL,
+    producto_id INT NOT NULL,
+    cantidad INT NOT NULL,
+    fecha DATE NOT NULL
+);
+
+ALTER TABLE productos_sucursales ADD PRIMARY KEY (sucursal_id,producto_id);
+ALTER TABLE productos_sucursales ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+ALTER TABLE productos_sucursales ADD FOREIGN KEY (producto_id) REFERENCES productos(codigo_id);
+
+CREATE TABLE paquetes(
+    codigo_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL,
+    precio NUMERIC(7,2) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE disciplinas(
+    codigo_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL,
+    desc_disciplina TEXT
+);
+
+
+CREATE TABLE paquetes_sucursales_disciplinas(
+    sucursal_id INT NOT NULL,
+    paquete_id INT NOT NULL,
+    desc_horario TEXT,
+    disciplina_id INT NOT NULL
+);
+
+ALTER TABLE paquetes_sucursales_disciplinas ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+ALTER TABLE paquetes_sucursales_disciplinas ADD FOREIGN KEY (paquete_id) REFERENCES paquetes(codigo_id);
+ALTER TABLE paquetes_sucursales_disciplinas ADD FOREIGN KEY (disciplina_id) REFERENCES disciplinas(codigo_id);
+
+
+CREATE TABLE venta_producto(
+    codigo_id BIGSERIAL PRIMARY KEY,
+    producto_id INT NOT NULL,
+    persona_id VARCHAR(30),
+    f_hora TIMESTAMP NOT NULL,
+    sucursal_id INT NOT NULL
+);
+
+ALTER TABLE venta_producto ADD FOREIGN KEY (producto_id) REFERENCES productos(codigo_id);
+ALTER TABLE venta_producto ADD FOREIGN KEY (persona_id) REFERENCES personas(codigo_id);
+ALTER TABLE venta_producto ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+
+CREATE TABLE venta_paquete_cliente(
+    codigo_id BIGSERIAL PRIMARY KEY,
+    cliente_id VARCHAR(30) NOT NULL,
+    paquete_id INT NOT NULL,
+    f_hora TIMESTAMP NOT NULL,
+    sucursal_id INT NOT NULL
+);
+
+ALTER TABLE venta_paquete_cliente ADD FOREIGN KEY (cliente_id) REFERENCES clientes(codigo_id);
+ALTER TABLE venta_paquete_cliente ADD FOREIGN KEY (paquete_id) REFERENCES paquetes(codigo_id);
+ALTER TABLE venta_paquete_cliente ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+
+CREATE TABLE entrada_salida_cliente(
+    cliente_id VARCHAR(30) NOT NULL,
+    sucursal_id INT NOT NULL,
+    hora_entrada TIMESTAMP NOT NULL,
+    hora_salida TIMESTAMP
+);
+
+ALTER TABLE entrada_salida_cliente ADD PRIMARY KEY (cliente_id,hora_entrada);
+ALTER TABLE entrada_salida_cliente ADD FOREIGN KEY (cliente_id) REFERENCES clientes(codigo_id);
+ALTER TABLE entrada_salida_cliente ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+
+CREATE TABLE reserva_producto(
+    persona_id VARCHAR(30) NOT NULL,
+    producto_id INT NOT NULL,
+    sucursal_id INT NOT NULL,
+    f_reserva TIMESTAMP NOT NULL,
+    f_limite TIMESTAMP
+);
+
+ALTER TABLE reserva_producto ADD FOREIGN KEY (persona_id) REFERENCES personas(codigo_id);
+ALTER TABLE reserva_producto ADD FOREIGN KEY (producto_id) REFERENCES productos(codigo_id);
+ALTER TABLE reserva_producto ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
+
+INSERT INTO paquetes VALUES(default,'VIP',15.00,null);
+INSERT INTO paquetes VALUES(default,'Super VIP',30.00,null);
+INSERT INTO paquetes VALUES(default,'Mega VIP',40.00,null);
+INSERT INTO paquetes VALUES(default,'Ultra VIP',60.00,null);
+
+INSERT INTO disciplinas VALUES(default,'Natacion',null);
+INSERT INTO disciplinas VALUES(default,'Boxeo',null);
+INSERT INTO disciplinas VALUES(default,'Kick Boxing',null);
+INSERT INTO disciplinas VALUES(default,'Taekwondo',null);
+INSERT INTO disciplinas VALUES(default,'Calistenia',null);
+INSERT INTO disciplinas VALUES(default,'Crossfit',null);
+INSERT INTO disciplinas VALUES(default,'Futbol',null);
+INSERT INTO disciplinas VALUES(default,'Zumba',null);
+
+INSERT INTO sucursales VALUES (default,'Gym de Caña 1', 'Por ahi');
+INSERT INTO sucursales VALUES(default,'Gym de Caña 2', 'En la esquina');
+INSERT INTO sucursales VALUES(default,'Gym de Caña 3', 'Piso 3');
+
+INSERT INTO paquetes_sucursales_disciplinas VALUES (1,1,null,1);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (2,2,null,2);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,3,null,3);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (1,4,null,4);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (2,1,null,5);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,2,null,6);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (1,3,null,7);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (2,4,null,8);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,1,null,1);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (1,2,null,2);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (2,3,null,3);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,4,null,4);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (1,1,null,5);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (2,2,null,6);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,3,null,7);
+
+
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,3,null,1);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,3,null,2);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,3,null,4);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,4,null,5);
+INSERT INTO paquetes_sucursales_disciplinas VALUES (3,4,null,7);
+
+INSERT INTO productos VALUES(default,100.00,'GNAR PUMP House Music');
+INSERT INTO productos VALUES(default,1050.00,'Esteroides');
+INSERT INTO productos VALUES(default,130.00,'WHEY protein Vainilla');
+INSERT INTO productos VALUES(default,200.00,'WHEY protein Cookies and Cream');
+INSERT INTO productos VALUES(default,300.00,'Zapatos adidas');
+INSERT INTO productos VALUES(default,500.00,'Zapatos pumas');
+INSERT INTO productos VALUES(default,70.00,'Polera nike');
+INSERT INTO productos VALUES(default,80.00,'Polera rebook');
+INSERT INTO productos VALUES(default,300.00,'Guante Box 16oz');
+INSERT INTO productos VALUES(default,230.00,'Guante Box 14oz');
+INSERT INTO productos VALUES(default,170.00,'Guante Box 11oz');
+
+INSERT INTO productos_sucursales VALUES(1,1,30,now());
+INSERT INTO productos_sucursales VALUES(2,1,12,now());
+INSERT INTO productos_sucursales VALUES(3,1,34,now());
+INSERT INTO productos_sucursales VALUES(1,2,36,now());
+INSERT INTO productos_sucursales VALUES(2,2,23,now());
+INSERT INTO productos_sucursales VALUES(3,2,76,now());
+INSERT INTO productos_sucursales VALUES(1,3,23,now());
+INSERT INTO productos_sucursales VALUES(2,3,48,now());
+INSERT INTO productos_sucursales VALUES(3,3,18,now());
+INSERT INTO productos_sucursales VALUES(1,4,10,now());
+INSERT INTO productos_sucursales VALUES(2,4,33,now());
+INSERT INTO productos_sucursales VALUES(3,4,23,now());
+INSERT INTO productos_sucursales VALUES(1,5,56,now());
+INSERT INTO productos_sucursales VALUES(2,5,8,now());
+INSERT INTO productos_sucursales VALUES(3,5,73,now());
+
+INSERT INTO productos_sucursales VALUES(1,6,12,now());
+INSERT INTO productos_sucursales VALUES(2,7,78,now());
+INSERT INTO productos_sucursales VALUES(3,8,34,now());
+INSERT INTO productos_sucursales VALUES(1,9,12,now());
+INSERT INTO productos_sucursales VALUES(2,10,5,now());
+INSERT INTO productos_sucursales VALUES(3,10,33,now());
+
+INSERT INTO personas VALUES('19983105-SCB','Samuel','Cordova','19980531','samy1998','1234');
+INSERT INTO personas VALUES('19970810-KMC','Kamila','Marquez','19970810','kamy1997','4321');
+INSERT INTO personas VALUES('19990312-ABC','Andres','Baldivieso','19990312','andy1999','1234');
+INSERT INTO personas VALUES('19991001-RCB','Rene','Cordova','19991001','reny1999','5678');
+INSERT INTO personas VALUES('19650827-AMB','Ana Maria','Baldivieso','19650827','amb65','8765');
+
+
+"[{"nombre":"Gym de Caña 3","direccion":"Piso 3","paquetes":[3, 2, 1, 4, 3, 3, 3, 3, 4, 4]}]"
+
+"[{"nombre":"Gym de Caña 3","direccion":"Piso 3","paquetes":[3, 2, 1, 4, 3, 3, 3, 3, 4, 4]}]"
+
+SELECT json_agg(RE) FROM (select s.nombre,s.direccion,json_agg(PA) as paquetes -- no funciona
+FROM (SELECT psd.paquete_id,json_agg(disciplina_id) as disciplinas
+FROM paquetes_sucursales_disciplinas psd 
+GROUP BY psd.sucursal_id,psd.paquete_id) AS PA 
+JOIN sucursales s 
+ON PA.sucursal_id = s.codigo_id
+GROUP BY s.nombre,s.direccion) AS RE;
+
+SELECT json_agg(RE) FROM (select s.nombre,s.direccion,json_agg(PA) as paquetes -- funciona con ids 
+FROM (SELECT psd.paquete_id,json_agg(disciplina_id) as disciplinas
+FROM paquetes_sucursales_disciplinas psd 
+GROUP BY psd.sucursal_id,psd.paquete_id) AS PA,
+sucursales s
+GROUP BY s.nombre,s.direccion) AS RE;
+
+
+SELECT json_agg(RE) FROM (select s.nombre,s.direccion,json_agg(PA) as paquetes -- completo
+FROM (SELECT pe.nombre,json_agg(json_build_object('nombre',di.nombre,'horario',psd.desc_horario)) as disciplinas
+FROM paquetes_sucursales_disciplinas psd JOIN paquetes pe ON psd.paquete_id = pe.codigo_id JOIN disciplinas di ON di.codigo_id = psd.disciplina_id 
+GROUP BY psd.sucursal_id,pe.nombre) AS PA,
+sucursales s
+GROUP BY s.nombre,s.direccion) AS RE;
+
+SELECT psd.sucursal_id, psd.paquete_id,json_agg(disciplina_id) as disciplinas -- funciona peros solo son paquetes con sus disciplinas
+FROM paquetes_sucursales_disciplinas psd 
+where psd.sucursal_id = 3
+GROUP BY  psd.sucursal_id, psd.paquete_id;
+
+-- productos por sucursales completo
+SELECT json_agg(RE) FROM (SELECT s.nombre,json_agg(json_build_object('nombre',pr.nombre,'cantidad',ps.cantidad,'precio',pr.precio,'fecha',ps.fecha)) as paquetes FROM productos_sucursales ps 
+JOIN productos pr ON ps.producto_id = pr.codigo_id,
+sucursales s WHERE ps.sucursal_id = s.codigo_id
+GROUP BY s.nombre) as RE;
+
+--Funcion Para genrar codigo
+	create or replace function generar_codigo(carnet text, nombre text, apellido1 text)
+	RETURNS text LANGUAGE plpgsql AS
+	$$
+	declare
+		codigo varchar(50);
+	BEGIN
+	
+ 		codigo := carnet ||
+		'-' || substring(nombre,1,1)|| substring(apellido1,1,1);
+		return codigo;
+	END;
+	$$
+	LANGUAGE plpgsql;
+end;
+
+	
+-- funcion para generar contraseña
+create or replace function generar_pass(fecha_nac date, nombre text, apellido text)
+	RETURNS text AS
+	$$
+	declare
+		codigo varchar(50);
+	BEGIN
+ 		codigo := split_part(fecha_nac::text, '-', 2)||split_part(fecha_nac::text, '-', 3) ||
+		'-' || substring(nombre,1,1)|| substring(apellido,1,1);
+		return codigo;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	--Primera crear la funcion que esta abajo para generar el codigo
+create or replace function ins_upd_empleado(fecha_nac date, snombre text, sapellido text,
+		 carnet text,surcusal int,labor text,Salario decimal(9,2))
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = fecha_nac where codigo_id = codigo;
+			update personas set contra = pass where codigo_id = codigo;
+			
+			update empleados set salario = Salario, desc_labor = labor,sucursal_id = sucursal;
+		else
+			insert into personas values(codigo, snombre, sapellido, fecha_nac, codigo, pass);	
+	        insert into empleados values(codigo,Salario,labor,surcusal);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	-- con contraseña encriptada registro empleado
+	create or replace function ins_upd_empleado(fecha_nac date, snombre text, sapellido text,
+		 carnet text,surcusal int,labor text,Salario decimal(9,2))
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = fecha_nac where codigo_id = codigo;			
+			update empleados set salario = Salario, desc_labor = labor,sucursal_id = sucursal;
+			
+		else
+			insert into personas values(codigo, snombre, sapellido, fecha_nac, codigo, encriptar_pass(pass));	
+	        insert into empleados values(codigo,Salario,labor,surcusal);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	-- nuevo queri para registro 
+	SELECT * FROM personas NATURAL JOIN empleados
+	create or replace function ins_upd_empleado(
+	fecha_nac text, snombre text, sapellido text,
+		 carnet text,
+	surcusal int,
+	labor text,salary double precision)
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		pass := (select generar_pass(to_date(fecha_nac, 'YYYYmmdd')::date,snombre,sapellido));
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = to_date(fecha_nac, 'YYYYmmdd')::date where codigo_id = codigo;			
+			update empleados set salario = salary::decimal, desc_labor = labor,sucursal_id = sucursal where codigo_id = codigo;
+			
+		else
+			insert into personas values(codigo, snombre, sapellido, to_date(fecha_nac, 'YYYYmmdd')::date, codigo, encriptar_pass(pass));	
+	        insert into empleados values(codigo,salary::decimal,labor,surcusal);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+-- insertar o actualizar cliente NUEVOO!!
+    create or replace function ins_upd_cliente(fecha_nac text, snombre text, sapellido text,
+		carnet text,surcusal int,Permitido boolean)
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		pass :=(select generar_pass(to_date(fecha_nac, 'YYYYmmdd')::date,snombre,sapellido))::text;
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = to_date(fecha_nac, 'YYYYmmdd')::date where codigo_id = codigo;
+			update clientes SET sucursal_id = sucursal, permitido = Permitido where codigo_id = codigo;
+		else
+			insert into personas values(codigo, snombre, sapellido, to_date(fecha_nac, 'YYYYmmdd')::date, codigo, encriptar_pass(pass));	
+	        insert into clientes values(codigo,now()::date,surcusal,Permitido);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+	
+
+-- Crear una clave encriptada
+CREATE OR REPLACE FUNCTION encriptar_pass(pass text)
+RETURNS text LANGUAGE plpgsql AS
+$$
+BEGIN
+	RETURN crypt(pass, gen_salt('md5'));
+END;
+$$
+-- Verificar la clave con el nombre de usuario
+CREATE OR REPLACE FUNCTION autenticar_user(usuario text, pass text)
+RETURNS boolean LANGUAGE plpgsql AS
+$$
+BEGIN
+	RETURN (contra = crypt(pass, contra)) AS pswmatch FROM personas WHERE n_usuario = usuario; 
+END;
+$$
+
+
+ 
